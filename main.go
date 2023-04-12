@@ -2,17 +2,26 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"os"
 
-	"github.com/goccy/go-graphviz"
-	"github.com/goccy/go-graphviz/cgraph"
-	"github.com/mathnogueira/go-arch/model"
+	"github.com/mathnogueira/go-arch/config"
 	"github.com/mathnogueira/go-arch/project"
+	"github.com/mathnogueira/go-arch/render"
 )
 
 func main() {
-	wd, err := os.Getwd()
+	// wd, err := os.Getwd()
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	wd := "/home/matheus/kubeshop/tracetest/server"
+
+	cfg, err := config.Load("./arch.yaml")
+	if err != nil {
+		panic(err)
+	}
+
+	tagEnricher, err := project.NewTagEnricher(cfg.Tags)
 	if err != nil {
 		panic(err)
 	}
@@ -22,7 +31,7 @@ func main() {
 		panic(err)
 	}
 
-	modules, err := project.Scan()
+	modules, err := project.Scan(tagEnricher)
 	if err != nil {
 		panic(err)
 	}
@@ -34,42 +43,8 @@ func main() {
 		}
 	}
 
-	err = renderGraph(modules)
+	err = render.GetRenderer().Render(modules)
 	if err != nil {
 		panic(err)
 	}
-}
-
-func renderGraph(modules []model.Module) error {
-	g := graphviz.New()
-	graph, err := g.Graph(graphviz.Directed, graphviz.StrictDirected)
-	if err != nil {
-		return err
-	}
-
-	defer func() {
-		graph.Close()
-		g.Close()
-	}()
-
-	graphNodes := make(map[string]*cgraph.Node, len(modules))
-
-	for _, module := range modules {
-		graphNodes[module.Name], _ = graph.CreateNode(module.Name)
-	}
-
-	for _, module := range modules {
-		for _, usedModule := range module.UsedBy.List() {
-			source := graphNodes[usedModule.Name]
-			target := graphNodes[module.Name]
-			graph.CreateEdge("", source, target)
-		}
-	}
-
-	// 3. write to file directly
-	if err := g.RenderFilename(graph, graphviz.PNG, "graph.png"); err != nil {
-		log.Fatal(err)
-	}
-
-	return nil
 }

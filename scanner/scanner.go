@@ -25,7 +25,7 @@ func ScanDirectory(dirPath string) ([]model.Module, error) {
 	modules := make([]model.Module, 0)
 
 	for name, pkg := range pkgs {
-		module, err := getModule(name, pkg)
+		module, err := getModule(name, dirPath, pkg)
 		if err != nil {
 			return []model.Module{}, err
 		}
@@ -35,7 +35,7 @@ func ScanDirectory(dirPath string) ([]model.Module, error) {
 	return modules, nil
 }
 
-func getModule(name string, pkg *ast.Package) (model.Module, error) {
+func getModule(name string, dirPath string, pkg *ast.Package) (model.Module, error) {
 	symbols := make([]model.Symbol, 0)
 	importedPkgs := make([]model.Import, 0)
 
@@ -52,10 +52,11 @@ func getModule(name string, pkg *ast.Package) (model.Module, error) {
 	}
 
 	return model.Module{
-		Name:    name,
-		Symbols: symbols,
-		Imports: importedPkgs,
-		UsedBy:  model.NewDependencies(),
+		Name:      name,
+		Directory: dirPath,
+		Symbols:   symbols,
+		Imports:   importedPkgs,
+		UsedBy:    model.NewDependencies(),
 	}, nil
 }
 

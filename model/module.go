@@ -1,10 +1,22 @@
 package model
 
 type Module struct {
-	Name    string
-	Symbols []Symbol
-	Imports []Import
-	UsedBy  Dependencies
+	Name      string
+	Directory string
+	Symbols   []Symbol
+	Imports   []Import
+	UsedBy    Dependencies
+	Tags      []string
+}
+
+func (m Module) HasTag(tag string) bool {
+	for _, item := range m.Tags {
+		if item == tag {
+			return true
+		}
+	}
+
+	return false
 }
 
 type Import struct {

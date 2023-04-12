@@ -1,0 +1,6 @@
+name: Go arch renderer
+tags:
+  config/*: core
+  model: core
+  project: core
+  render: infrastructure

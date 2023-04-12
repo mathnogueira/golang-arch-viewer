@@ -2,14 +2,18 @@ package project
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
+	"github.com/mathnogueira/go-arch/config"
 	"github.com/mathnogueira/go-arch/model"
 	"github.com/mathnogueira/go-arch/scanner"
 )
 
-func (p *Project) Scan() ([]model.Module, error) {
+type ModuleEnricher interface {
+	Enrich(project *Project, module *model.Module)
+}
+
+func (p *Project) Scan(enrichers ...ModuleEnricher) ([]model.Module, error) {
 	p.scannedDirectories = make(map[string]bool)
 	scannedModules := make(map[string]*model.Module, 0)
 	err := p.scanDirectory(p.RootDir, scannedModules)
@@ -28,6 +32,10 @@ func (p *Project) Scan() ([]model.Module, error) {
 
 	modules := make([]model.Module, 0)
 	for _, module := range scannedModules {
+		for _, enricher := range enrichers {
+			enricher.Enrich(p, module)
+		}
+
 		modules = append(modules, *module)
 	}
 
@@ -46,8 +54,6 @@ func (p *Project) scanDirectory(path string, scannedModules map[string]*model.Mo
 		return fmt.Errorf("could not find any module in the project root: %w", err)
 	}
 
-	wd, _ := os.Getwd()
-
 	p.scannedDirectories[path] = true
 
 	for _, module := range modules {
@@ -58,7 +64,7 @@ func (p *Project) scanDirectory(path string, scannedModules map[string]*model.Mo
 				continue
 			}
 
-			modulePath := strings.ReplaceAll(importedModule.Path, p.ModuleName, wd)
+			modulePath := strings.ReplaceAll(importedModule.Path, p.ModuleName, p.RootDir)
 			fmt.Printf("\tImports %s\n", modulePath)
 		}
 
@@ -67,10 +73,15 @@ func (p *Project) scanDirectory(path string, scannedModules map[string]*model.Mo
 				continue
 			}
 
-			modulePath := strings.ReplaceAll(importedModule.Path, p.ModuleName, wd)
+			modulePath := strings.ReplaceAll(importedModule.Path, p.ModuleName, p.RootDir)
 			p.scanDirectory(modulePath, scannedModules)
 		}
 	}
 
 	return nil
+}
+
+func (p *Project) injectTags(module *model.Module, cfg config.Config) {
+	// tags := cfg.Tags
+	// module.
 }
