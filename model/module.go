@@ -6,17 +6,8 @@ type Module struct {
 	Symbols   []Symbol
 	Imports   []Import
 	UsedBy    Dependencies
-	Tags      []string
-}
-
-func (m Module) HasTag(tag string) bool {
-	for _, item := range m.Tags {
-		if item == tag {
-			return true
-		}
-	}
-
-	return false
+	Type      string
+	Group     string
 }
 
 type Import struct {

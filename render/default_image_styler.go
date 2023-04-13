@@ -8,16 +8,17 @@ import (
 type DefaultImageStyler struct{}
 
 func (s DefaultImageStyler) StyleNode(module model.Module, node *cgraph.Node) {
-	fillColor := "#e0e0e0"
+	node.SetStyle(cgraph.FilledNodeStyle)
 
-	if module.HasTag("core") {
-		fillColor = "#c9e6be"
-	} else if module.HasTag("infrastructure") {
-		fillColor = "#a1bbe3"
+	if module.Type == "core" {
+		node.SetFillColor("#c9e6be")
+	} else if module.Type == "infrastructure" {
+		node.SetFillColor("#a1bbe3")
+	} else if module.Type == "mixed" {
+		node.SetFillColor("#de957f")
 	}
 
-	node.SetStyle(cgraph.FilledNodeStyle)
-	node.SetFillColor(fillColor)
+	node.SetGroup(module.Group)
 }
 
 func (s DefaultImageStyler) StyleArrow(source, target model.Module, edge *cgraph.Edge) {

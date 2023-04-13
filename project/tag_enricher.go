@@ -5,16 +5,17 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/mathnogueira/go-arch/config"
 	"github.com/mathnogueira/go-arch/model"
 )
 
-type TagEnricher struct {
-	tags map[*regexp.Regexp][]string
+type ModuleSpecEnricher struct {
+	spec map[*regexp.Regexp]config.ModuleSpec
 }
 
-func NewTagEnricher(tags map[string][]string) (ModuleEnricher, error) {
-	processedTags := make(map[*regexp.Regexp][]string, len(tags))
-	for query, tags := range tags {
+func NewModuleEnricher(modules map[string]config.ModuleSpec) (ModuleEnricher, error) {
+	processedModules := make(map[*regexp.Regexp]config.ModuleSpec, len(modules))
+	for query, module := range modules {
 		if strings.HasSuffix(query, "/*") {
 			query = strings.ReplaceAll(query, "/*", "/?(.*)")
 		}
@@ -26,19 +27,20 @@ func NewTagEnricher(tags map[string][]string) (ModuleEnricher, error) {
 			return nil, fmt.Errorf("could not convert tag query to regex: (%s: %s): %w", query, regexQuery, err)
 		}
 
-		processedTags[regex] = tags
+		processedModules[regex] = module
 	}
 
-	return &TagEnricher{processedTags}, nil
+	return &ModuleSpecEnricher{processedModules}, nil
 }
 
-func (t *TagEnricher) Enrich(project *Project, module *model.Module) {
+func (t *ModuleSpecEnricher) Enrich(project *Project, module *model.Module) {
 	relativePath := strings.TrimPrefix(module.Directory, project.RootDir)
 	relativePath = strings.TrimPrefix(relativePath, "/")
 
-	for regex, tags := range t.tags {
+	for regex, spec := range t.spec {
 		if regex.Match([]byte(relativePath)) {
-			module.Tags = tags
+			module.Type = spec.Type
+			module.Group = spec.Group
 		}
 	}
 }

@@ -21,7 +21,7 @@ func main() {
 		panic(err)
 	}
 
-	tagEnricher, err := project.NewTagEnricher(cfg.Tags)
+	tagEnricher, err := project.NewModuleEnricher(cfg.Modules)
 	if err != nil {
 		panic(err)
 	}

@@ -9,10 +9,13 @@ import (
 
 type Config struct {
 	ProjectName string
-	Tags        Tags
+	Modules     map[string]ModuleSpec
 }
 
-type Tags map[string][]string
+type ModuleSpec struct {
+	Type  string
+	Group string
+}
 
 func Load(file string) (Config, error) {
 	if _, err := os.Stat(file); err != nil {
