@@ -44,11 +44,9 @@ func (p *Project) Scan(enrichers ...ModuleEnricher) ([]model.Module, error) {
 
 func (p *Project) scanDirectory(path string, scannedModules map[string]*model.Module) error {
 	if _, found := p.scannedDirectories[path]; found {
-		fmt.Printf("\t\t%s was skipped\n", path)
 		return nil
 	}
 
-	fmt.Printf("Scanning directory %s\n", path)
 	modules, err := scanner.ScanDirectory(path)
 	if err != nil {
 		return fmt.Errorf("could not find any module in the project root: %w", err)
@@ -63,9 +61,6 @@ func (p *Project) scanDirectory(path string, scannedModules map[string]*model.Mo
 			if !strings.HasPrefix(importedModule.Path, p.ModuleName) {
 				continue
 			}
-
-			modulePath := strings.ReplaceAll(importedModule.Path, p.ModuleName, p.RootDir)
-			fmt.Printf("\tImports %s\n", modulePath)
 		}
 
 		for _, importedModule := range module.Imports {

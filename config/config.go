@@ -9,12 +9,22 @@ import (
 
 type Config struct {
 	ProjectName string
+	Style       map[string]StyleSpec
 	Modules     map[string]ModuleSpec
+	Clusters    map[string]ClusterSpec
 }
 
 type ModuleSpec struct {
 	Type  string
 	Group string
+}
+
+type StyleSpec struct {
+	Color string
+}
+
+type ClusterSpec struct {
+	Color string
 }
 
 func Load(file string) (Config, error) {
@@ -36,6 +46,8 @@ func Load(file string) (Config, error) {
 	if err != nil {
 		return Config{}, fmt.Errorf("could not unmarshal config: %w", err)
 	}
+
+	fmt.Println(config)
 
 	return config, nil
 }

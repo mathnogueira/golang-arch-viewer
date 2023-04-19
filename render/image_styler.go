@@ -7,5 +7,6 @@ import (
 
 type ImageStyler interface {
 	StyleNode(module model.Module, node *cgraph.Node)
-	StyleArrow(source, target model.Module, edge *cgraph.Edge)
+	StyleArrow(source, target model.Module, sourceCluster, targetCluster *cgraph.Graph, edge *cgraph.Edge)
+	StyleCluster(name string, cluster *cgraph.Graph)
 }

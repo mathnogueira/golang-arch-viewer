@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"os"
 
 	"github.com/mathnogueira/go-arch/config"
 	"github.com/mathnogueira/go-arch/project"
@@ -9,12 +9,12 @@ import (
 )
 
 func main() {
-	// wd, err := os.Getwd()
-	// if err != nil {
-	// 	panic(err)
-	// }
+	wd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
 
-	wd := "/home/matheus/kubeshop/tracetest/server"
+	wd = "/home/matheus/kubeshop/tracetest/server"
 
 	cfg, err := config.Load("./arch.yaml")
 	if err != nil {
@@ -36,14 +36,7 @@ func main() {
 		panic(err)
 	}
 
-	for _, module := range modules {
-		fmt.Printf("Module %s\n", module.Name)
-		for _, usedBy := range module.UsedBy.List() {
-			fmt.Printf("\tUsed by %s\n", usedBy.Name)
-		}
-	}
-
-	err = render.GetRenderer().Render(modules)
+	err = render.GetRenderer(cfg).Render(modules)
 	if err != nil {
 		panic(err)
 	}
