@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/mathnogueira/go-arch/config"
@@ -11,14 +12,14 @@ import (
 func main() {
 	wd, err := os.Getwd()
 	if err != nil {
-		panic(err)
+		fmt.Println("Cannot get current working directory:", err.Error())
+		os.Exit(1)
 	}
-
-	wd = "/home/matheus/kubeshop/tracetest/server"
 
 	cfg, err := config.Load("./arch.yaml")
 	if err != nil {
-		panic(err)
+		fmt.Println("Cannot load the './arch.yaml' file:", err.Error())
+		os.Exit(1)
 	}
 
 	tagEnricher, err := project.NewModuleEnricher(cfg.Modules)
@@ -36,7 +37,12 @@ func main() {
 		panic(err)
 	}
 
-	err = render.GetRenderer(cfg).Render(modules)
+	outputFile := "graph.png"
+	if len(os.Args) > 1 {
+		outputFile = os.Args[1]
+	}
+
+	err = render.GetRenderer(cfg).Render(modules, outputFile)
 	if err != nil {
 		panic(err)
 	}

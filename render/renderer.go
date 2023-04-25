@@ -6,7 +6,7 @@ import (
 )
 
 type Renderer interface {
-	Render(modules []model.Module) error
+	Render(modules []model.Module, outputFile string) error
 }
 
 func GetRenderer(config config.Config) Renderer {
