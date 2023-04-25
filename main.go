@@ -37,7 +37,12 @@ func main() {
 		panic(err)
 	}
 
-	err = render.GetRenderer(cfg).Render(modules)
+	outputFile := "graph.png"
+	if len(os.Args) > 1 {
+		outputFile = os.Args[1]
+	}
+
+	err = render.GetRenderer(cfg).Render(modules, outputFile)
 	if err != nil {
 		panic(err)
 	}

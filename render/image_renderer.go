@@ -16,7 +16,7 @@ type ImageRenderer struct {
 	styler       ImageStyler
 }
 
-func (ir *ImageRenderer) Render(modules []model.Module) error {
+func (ir *ImageRenderer) Render(modules []model.Module, outputFile string) error {
 	g := graphviz.New()
 	graph, err := g.Graph(graphviz.Directed, graphviz.StrictDirected)
 	if err != nil {
@@ -50,7 +50,7 @@ func (ir *ImageRenderer) Render(modules []model.Module) error {
 	}
 
 	// 3. write to file directly
-	if err := g.RenderFilename(graph, graphviz.PNG, "graph.png"); err != nil {
+	if err := g.RenderFilename(graph, graphviz.PNG, outputFile); err != nil {
 		log.Fatal(err)
 	}
 
