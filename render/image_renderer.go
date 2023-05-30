@@ -9,10 +9,15 @@ import (
 	"github.com/mathnogueira/go-arch/model"
 )
 
+type Edge struct {
+	*cgraph.Edge
+	NumberReferences int
+}
+
 type ImageRenderer struct {
 	nodes        map[string]*cgraph.Node
 	groups       map[string]*cgraph.Graph
-	clusterEdges map[string]*cgraph.Edge
+	clusterEdges map[string]*Edge
 	styler       ImageStyler
 }
 
@@ -37,7 +42,7 @@ func (ir *ImageRenderer) Render(modules []model.Module, outputFile string) error
 
 	ir.nodes = make(map[string]*cgraph.Node, len(modules))
 	ir.groups = make(map[string]*cgraph.Graph, 0)
-	ir.clusterEdges = make(map[string]*cgraph.Edge, 0)
+	ir.clusterEdges = make(map[string]*Edge, 0)
 
 	for _, module := range modules {
 		ir.renderModule(graph, module)
@@ -47,6 +52,11 @@ func (ir *ImageRenderer) Render(modules []model.Module, outputFile string) error
 		for _, usedModule := range module.UsedBy.List() {
 			ir.renderDependency(graph, module, *usedModule)
 		}
+	}
+
+	for _, edge := range ir.clusterEdges {
+		// render reference count
+		edge.Edge.SetXLabel(fmt.Sprintf("%d", edge.NumberReferences))
 	}
 
 	// 3. write to file directly
@@ -86,7 +96,9 @@ func (ir *ImageRenderer) renderDependency(graph *cgraph.Graph, target, source mo
 
 	if target.Group != source.Group {
 		if _, exists := ir.clusterEdges[edgeName]; exists {
-			// An edge already exists and we don't need to render a new one
+			// An edge already exists and we don't need to render a new one, but we have to increase the
+			// reference count
+			ir.clusterEdges[edgeName].NumberReferences += 1
 			return nil
 		}
 	}
@@ -111,7 +123,10 @@ func (ir *ImageRenderer) renderDependency(graph *cgraph.Graph, target, source mo
 		edge.SetLogicalTail(fmt.Sprintf("cluster_%s", source.Group))
 		edge.SetMinLen(2)
 
-		ir.clusterEdges[edgeName] = edge
+		ir.clusterEdges[edgeName] = &Edge{
+			Edge:             edge,
+			NumberReferences: 1,
+		}
 	}
 
 	return nil
