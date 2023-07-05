@@ -71,7 +71,13 @@ func (ir *ImageRenderer) renderModule(graph *cgraph.Graph, module model.Module) 
 	cluster := ir.getGroupCluster(graph, module)
 	node, _ := cluster.CreateNode(module.Name)
 	ir.styler.StyleNode(module, node)
-	ir.nodes[module.Name] = node
+	if _, exists := ir.nodes[module.UniqueName()]; exists {
+		panic("node already exists!")
+	}
+
+	ir.nodes[module.UniqueName()] = node
+
+	fmt.Printf("%s rendered on cluster_%s (%p)\n", module.UniqueName(), module.Group, node)
 
 	return nil
 }
@@ -90,9 +96,9 @@ func (ir *ImageRenderer) getGroupCluster(graph *cgraph.Graph, module model.Modul
 }
 
 func (ir *ImageRenderer) renderDependency(graph *cgraph.Graph, target, source model.Module) error {
-	targetNode := ir.nodes[target.Name]
-	sourceNode := ir.nodes[source.Name]
-	edgeName := fmt.Sprintf("%s -> %s", source.Group, target.Group)
+	targetNode := ir.nodes[target.UniqueName()]
+	sourceNode := ir.nodes[source.UniqueName()]
+	edgeName := fmt.Sprintf("%s -> %s", source.UniqueName(), target.UniqueName())
 
 	if target.Group != source.Group {
 		if _, exists := ir.clusterEdges[edgeName]; exists {

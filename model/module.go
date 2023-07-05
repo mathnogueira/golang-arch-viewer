@@ -10,6 +10,10 @@ type Module struct {
 	Group     string
 }
 
+func (m Module) UniqueName() string {
+	return m.Directory
+}
+
 type Import struct {
 	Path   string
 	Module Module
@@ -28,11 +32,11 @@ func NewDependencies() Dependencies {
 	return Dependencies{dependenciesMap: make(map[string][]*Module)}
 }
 
-func (d *Dependencies) Add(moduleName string, dep *Module) {
-	if arr, found := d.dependenciesMap[moduleName]; found {
-		d.dependenciesMap[moduleName] = append(arr, dep)
+func (d *Dependencies) Add(dep *Module) {
+	if arr, found := d.dependenciesMap[dep.UniqueName()]; found {
+		d.dependenciesMap[dep.UniqueName()] = append(arr, dep)
 	} else {
-		d.dependenciesMap[moduleName] = []*Module{dep}
+		d.dependenciesMap[dep.UniqueName()] = []*Module{dep}
 	}
 }
 

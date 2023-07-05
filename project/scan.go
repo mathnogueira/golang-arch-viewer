@@ -2,9 +2,9 @@ package project
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
-	"github.com/mathnogueira/go-arch/config"
 	"github.com/mathnogueira/go-arch/model"
 	"github.com/mathnogueira/go-arch/scanner"
 )
@@ -25,7 +25,7 @@ func (p *Project) Scan(enrichers ...ModuleEnricher) ([]model.Module, error) {
 		for _, importedModule := range module.Imports {
 			importedModulePath := strings.ReplaceAll(importedModule.Path, p.ModuleName, p.RootDir)
 			if referencedModule, found := scannedModules[importedModulePath]; found {
-				referencedModule.UsedBy.Add(module.Name, module)
+				referencedModule.UsedBy.Add(module)
 			}
 		}
 	}
@@ -38,6 +38,10 @@ func (p *Project) Scan(enrichers ...ModuleEnricher) ([]model.Module, error) {
 
 		modules = append(modules, *module)
 	}
+
+	sort.Slice(modules, func(i, j int) bool {
+		return modules[i].Directory <= modules[j].Directory
+	})
 
 	return modules, nil
 }
@@ -74,9 +78,4 @@ func (p *Project) scanDirectory(path string, scannedModules map[string]*model.Mo
 	}
 
 	return nil
-}
-
-func (p *Project) injectTags(module *model.Module, cfg config.Config) {
-	// tags := cfg.Tags
-	// module.
 }
