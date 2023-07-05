@@ -39,6 +39,8 @@ func (p *Project) Scan(enrichers ...ModuleEnricher) ([]model.Module, error) {
 		modules = append(modules, *module)
 	}
 
+	modules = p.ensureNoNameCollision(modules)
+
 	sort.Slice(modules, func(i, j int) bool {
 		return modules[i].Directory <= modules[j].Directory
 	})
@@ -65,12 +67,6 @@ func (p *Project) scanDirectory(path string, scannedModules map[string]*model.Mo
 			if !strings.HasPrefix(importedModule.Path, p.ModuleName) {
 				continue
 			}
-		}
-
-		for _, importedModule := range module.Imports {
-			if !strings.HasPrefix(importedModule.Path, p.ModuleName) {
-				continue
-			}
 
 			modulePath := strings.ReplaceAll(importedModule.Path, p.ModuleName, p.RootDir)
 			p.scanDirectory(modulePath, scannedModules)
@@ -78,4 +74,25 @@ func (p *Project) scanDirectory(path string, scannedModules map[string]*model.Mo
 	}
 
 	return nil
+}
+
+func (p *Project) ensureNoNameCollision(modules []model.Module) []model.Module {
+	namedModules := make(map[string][]model.Module, 0)
+	for _, module := range modules {
+		namedModules[module.Name] = append(namedModules[module.Name], module)
+	}
+
+	newModules := make([]model.Module, 0, len(modules))
+	for _, values := range namedModules {
+		for i, module := range values {
+			if len(values) > 1 {
+				// conflict
+				module.Name = fmt.Sprintf("%s #%d", module.Name, i)
+			}
+
+			newModules = append(newModules, module)
+		}
+	}
+
+	return newModules
 }
