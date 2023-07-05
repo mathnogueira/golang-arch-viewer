@@ -84,10 +84,11 @@ func (p *Project) ensureNoNameCollision(modules []model.Module) []model.Module {
 
 	newModules := make([]model.Module, 0, len(modules))
 	for _, values := range namedModules {
-		for i, module := range values {
+		for _, module := range values {
 			if len(values) > 1 {
 				// conflict
-				module.Name = fmt.Sprintf("%s #%d", module.Name, i)
+				path := strings.Split(module.Directory, "/")
+				module.Name = strings.Join(path[len(path)-2:], "/")
 			}
 
 			newModules = append(newModules, module)

@@ -77,8 +77,6 @@ func (ir *ImageRenderer) renderModule(graph *cgraph.Graph, module model.Module) 
 
 	ir.nodes[module.UniqueName()] = node
 
-	fmt.Printf("%s rendered on cluster_%s (%p)\n", module.UniqueName(), module.Group, node)
-
 	return nil
 }
 

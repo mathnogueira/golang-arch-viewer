@@ -47,7 +47,5 @@ func Load(file string) (Config, error) {
 		return Config{}, fmt.Errorf("could not unmarshal config: %w", err)
 	}
 
-	fmt.Println(config)
-
 	return config, nil
 }
