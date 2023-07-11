@@ -96,7 +96,7 @@ func (ir *ImageRenderer) getGroupCluster(graph *cgraph.Graph, module model.Modul
 func (ir *ImageRenderer) renderDependency(graph *cgraph.Graph, target, source model.Module) error {
 	targetNode := ir.nodes[target.UniqueName()]
 	sourceNode := ir.nodes[source.UniqueName()]
-	edgeName := fmt.Sprintf("%s -> %s", source.UniqueName(), target.UniqueName())
+	edgeName := fmt.Sprintf("%s -> %s", source.Group, target.Group)
 
 	if target.Group != source.Group {
 		if _, exists := ir.clusterEdges[edgeName]; exists {
@@ -125,7 +125,7 @@ func (ir *ImageRenderer) renderDependency(graph *cgraph.Graph, target, source mo
 		ir.styler.StyleArrow(source, target, sourceCluster, targetCluster, edge)
 		edge.SetLogicalHead(fmt.Sprintf("cluster_%s", target.Group))
 		edge.SetLogicalTail(fmt.Sprintf("cluster_%s", source.Group))
-		edge.SetMinLen(2)
+		edge.SetMinLen(3)
 
 		ir.clusterEdges[edgeName] = &Edge{
 			Edge:             edge,
